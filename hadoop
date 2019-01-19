@@ -1,0 +1,5 @@
+hadoop做数据分析（掌握用户接口，针对用户接口写逻辑）
+hdfs是集群（分布式的负责文件读写），yarn也是集群（负责为mapreduce程序分配运算硬件资源），编写的mapreduce程序交给yun集群去执行。
+hdfs集群中的leader是name node，小弟是data node，name node配置端口9000.
+yarn集群中的leader是resource manager，小弟是node manager，一般node manager与data node放在一块。resource manager与name node也可以放在一起，也可以
+分开。
