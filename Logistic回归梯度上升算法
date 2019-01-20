@@ -1,0 +1,359 @@
+Logistic回归与梯度上升算法
+Logistic回归是众多分类算法中的一员。通常，Logistic回归用于二分类问题，例如预测明天是否会下雨。当然它也可以用于多分类问题，不过为了简单起见，本文暂先讨论
+二分类问题。首先，让我们来了解一下，什么是Logistic回归。
+Logistic回归
+假设现在有一些数据点，我们利用一条直线对这些点进行拟合(该线称为最佳拟合直线)，这个拟合过程就称作为回归。
+Logistic回归是分类方法，它利用的是Sigmoid函数阈值在[0,1]这个特性。Logistic回归进行分类的主要思想是：根据现有数据对分类边界线建立回归公式，以此进行分类。
+其实，Logistic本质上是一个基于条件概率的判别模型(Discriminative Model)。
+
+本结推导及理解公式非常重要。具体推导参考博客。
+
+下面代码可以提供改进方法，不通过循环次数改变来确定最优解，而是通过设置精度，进行对比的方式可以研究一下。
+# -*- coding:UTF-8 -*-
+"""
+函数说明:梯度上升算法测试函数
+ 
+求函数f(x) = -x^2 + 4x的极大值
+ 
+Parameters:
+    无
+Returns:
+    无
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def Gradient_Ascent_test():
+    def f_prime(x_old):                                    #f(x)的导数
+        return -2 * x_old + 4
+    x_old = -1                                            #初始值，给一个小于x_new的值
+    x_new = 0                                            #梯度上升算法初始值，即从(0,0)开始
+    alpha = 0.01                                        #步长，也就是学习速率，控制更新的幅度
+    presision = 0.00000001                                #精度，也就是更新阈值
+    while abs(x_new - x_old) > presision:
+        x_old = x_new
+        x_new = x_old + alpha * f_prime(x_old)            #上面提到的公式
+    print(x_new)                                        #打印最终求解的极值近似值
+ 
+if __name__ == '__main__':
+    Gradient_Ascent_test()
+    
+编写代码，看下数据集的分布情况
+
+# -*- coding:UTF-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+
+"""
+函数说明:加载数据
+
+Parameters:
+    无
+Returns:
+    dataMat - 数据列表
+    labelMat - 标签列表
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def loadDataSet():
+    dataMat = []                                                        #创建数据列表
+    labelMat = []                                                        #创建标签列表
+    fr = open('testSet.txt')                                            #打开文件   
+    for line in fr.readlines():                                            #逐行读取
+        lineArr = line.strip().split()                                    #去回车，放入列表
+        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])        #添加数据
+        labelMat.append(int(lineArr[2]))                                #添加标签
+    fr.close()                                                            #关闭文件
+    return dataMat, labelMat                                            #返回
+
+"""
+函数说明:绘制数据集
+
+Parameters:
+    无
+Returns:
+    无
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def plotDataSet():
+    dataMat, labelMat = loadDataSet()                                    #加载数据集
+    dataArr = np.array(dataMat)                                            #转换成numpy的array数组
+    n = np.shape(dataMat)[0]                                            #数据个数
+    xcord1 = []; ycord1 = []                                            #正样本
+    xcord2 = []; ycord2 = []                                            #负样本
+    for i in range(n):                                                    #根据数据集标签进行分类
+        if int(labelMat[i]) == 1:
+            xcord1.append(dataArr[i,1]); ycord1.append(dataArr[i,2])    #1为正样本
+        else:
+            xcord2.append(dataArr[i,1]); ycord2.append(dataArr[i,2])    #0为负样本
+    fig = plt.figure()
+    ax = fig.add_subplot(111)                                            #添加subplot
+    ax.scatter(xcord1, ycord1, s = 20, c = 'red', marker = 's',alpha=.5)#绘制正样本
+    ax.scatter(xcord2, ycord2, s = 20, c = 'green',alpha=.5)            #绘制负样本
+    plt.title('DataSet')                                                #绘制title
+    plt.xlabel('x'); plt.ylabel('y')                                    #绘制label
+    plt.show()                                                            #显示
+
+if __name__ == '__main__':
+    plotDataSet()
+    
+训练算法
+
+# -*- coding:UTF-8 -*-
+import numpy as np
+
+"""
+函数说明:加载数据
+
+Parameters:
+    无
+Returns:
+    dataMat - 数据列表
+    labelMat - 标签列表
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def loadDataSet():
+    dataMat = []                                                        #创建数据列表
+    labelMat = []                                                        #创建标签列表
+    fr = open('testSet.txt')                                            #打开文件   
+    for line in fr.readlines():                                            #逐行读取
+        lineArr = line.strip().split()                                    #去回车，放入列表
+        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])        #添加数据
+        labelMat.append(int(lineArr[2]))                                #添加标签
+    fr.close()                                                            #关闭文件
+    return dataMat, labelMat                                            #返回
+
+"""
+函数说明:sigmoid函数
+
+Parameters:
+    inX - 数据
+Returns:
+    sigmoid函数
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def sigmoid(inX):
+    return 1.0 / (1 + np.exp(-inX))
+
+
+"""
+函数说明:梯度上升算法
+
+Parameters:
+    dataMatIn - 数据集
+    classLabels - 数据标签
+Returns:
+    weights.getA() - 求得的权重数组(最优参数)
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def gradAscent(dataMatIn, classLabels):
+    dataMatrix = np.mat(dataMatIn)                                        #转换成numpy的mat
+    labelMat = np.mat(classLabels).transpose()                            #转换成numpy的mat,并进行转置
+    m, n = np.shape(dataMatrix)                                            #返回dataMatrix的大小。m为行数,n为列数。
+    alpha = 0.001                                                        #移动步长,也就是学习速率,控制更新的幅度。
+    maxCycles = 500                                                        #最大迭代次数
+    weights = np.ones((n,1))
+    for k in range(maxCycles):
+        h = sigmoid(dataMatrix * weights)                                #梯度上升矢量化公式
+        error = labelMat - h
+        weights = weights + alpha * dataMatrix.transpose() * error
+    return weights.getA()                                                #将矩阵转换为数组，返回权重数组
+
+if __name__ == '__main__':
+    dataMat, labelMat = loadDataSet()           
+    print(gradAscent(dataMat, labelMat))
+    
+绘制决策边界
+
+# -*- coding:UTF-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+
+"""
+函数说明:加载数据
+
+Parameters:
+    无
+Returns:
+    dataMat - 数据列表
+    labelMat - 标签列表
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def loadDataSet():
+    dataMat = []                                                        #创建数据列表
+    labelMat = []                                                        #创建标签列表
+    fr = open('testSet.txt')                                            #打开文件   
+    for line in fr.readlines():                                            #逐行读取
+        lineArr = line.strip().split()                                    #去回车，放入列表
+        dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])        #添加数据
+        labelMat.append(int(lineArr[2]))                                #添加标签
+    fr.close()                                                            #关闭文件
+    return dataMat, labelMat                                            #返回
+
+
+"""
+函数说明:sigmoid函数
+
+Parameters:
+    inX - 数据
+Returns:
+    sigmoid函数
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def sigmoid(inX):
+    return 1.0 / (1 + np.exp(-inX))
+
+"""
+函数说明:梯度上升算法
+
+Parameters:
+    dataMatIn - 数据集
+    classLabels - 数据标签
+Returns:
+    weights.getA() - 求得的权重数组(最优参数)
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-28
+"""
+def gradAscent(dataMatIn, classLabels):
+    dataMatrix = np.mat(dataMatIn)                                        #转换成numpy的mat
+    labelMat = np.mat(classLabels).transpose()                            #转换成numpy的mat,并进行转置
+    m, n = np.shape(dataMatrix)                                            #返回dataMatrix的大小。m为行数,n为列数。
+    alpha = 0.001                                                        #移动步长,也就是学习速率,控制更新的幅度。
+    maxCycles = 500                                                        #最大迭代次数
+    weights = np.ones((n,1))
+    for k in range(maxCycles):
+        h = sigmoid(dataMatrix * weights)                                #梯度上升矢量化公式
+        error = labelMat - h
+        weights = weights + alpha * dataMatrix.transpose() * error
+    return weights.getA()                                                #将矩阵转换为数组，返回权重数组
+
+"""
+函数说明:绘制数据集
+
+Parameters:
+    weights - 权重参数数组
+Returns:
+    无
+Author:
+    Jack Cui
+Blog:
+    http://blog.csdn.net/c406495762
+Zhihu:
+    https://www.zhihu.com/people/Jack--Cui/
+Modify:
+    2017-08-30
+"""
+def plotBestFit(weights):
+    dataMat, labelMat = loadDataSet()                                    #加载数据集
+    dataArr = np.array(dataMat)                                            #转换成numpy的array数组
+    n = np.shape(dataMat)[0]                                            #数据个数
+    xcord1 = []; ycord1 = []                                            #正样本
+    xcord2 = []; ycord2 = []                                            #负样本
+    for i in range(n):                                                    #根据数据集标签进行分类
+        if int(labelMat[i]) == 1:
+            xcord1.append(dataArr[i,1]); ycord1.append(dataArr[i,2])    #1为正样本
+        else:
+            xcord2.append(dataArr[i,1]); ycord2.append(dataArr[i,2])    #0为负样本
+    fig = plt.figure()
+    ax = fig.add_subplot(111)                                            #添加subplot
+    ax.scatter(xcord1, ycord1, s = 20, c = 'red', marker = 's',alpha=.5)#绘制正样本
+    ax.scatter(xcord2, ycord2, s = 20, c = 'green',alpha=.5)            #绘制负样本
+    x = np.arange(-3.0, 3.0, 0.1)
+    y = (-weights[0] - weights[1] * x) / weights[2]
+    ax.plot(x, y)
+    plt.title('BestFit')                                                #绘制title
+    plt.xlabel('X1'); plt.ylabel('X2')                                    #绘制label
+    plt.show()       
+
+if __name__ == '__main__':
+    dataMat, labelMat = loadDataSet()           
+    weights = gradAscent(dataMat, labelMat)
+    plotBestFit(weights)
+    
+尽管例子简单切数据集很小，但是这个方法却需要大量的计算(300次乘法)。因此下篇文章将对改算法稍作改进，从而减少计算量，使其可以应用于大数据集上。
+改进的随机梯度上升算法
+def stocGradAscent1(dataMatrix, classLabels, numIter=150):
+    m,n = np.shape(dataMatrix)                                                #返回dataMatrix的大小。m为行数,n为列数。
+    weights = np.ones(n)                                                       #参数初始化
+    for j in range(numIter):                                           
+        dataIndex = list(range(m))
+        for i in range(m):           
+            alpha = 4/(1.0+j+i)+0.01                                            #降低alpha的大小，每次减小1/(j+i)。
+            randIndex = int(random.uniform(0,len(dataIndex)))                #随机选取样本
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))                    #选择随机选取的一个样本，计算h
+            error = classLabels[randIndex] - h                                 #计算误差
+            weights = weights + alpha * error * dataMatrix[randIndex]       #更新回归系数
+            del(dataIndex[randIndex])                                         #删除已经使用的样本
+    return weights       #返回
+    
+该算法第一个改进之处在于，alpha在每次迭代的时候都会调整，并且，虽然alpha会随着迭代次数不断减小，但永远不会减小到0，因为这里还存在一个常数项。必须这样
+做的原因是为了保证在多次迭代之后新数据仍然具有一定的影响。如果需要处理的问题是动态变化的，那么可以适当加大上述常数项，来确保新的值获得更大的回归系数。
+另一点值得注意的是，在降低alpha的函数中，alpha每次减少1/(j+i)，其中j是迭代次数，i是样本点的下标。第二个改进的地方在于更新回归系数(最优参数)时，只使用
+一个样本点，并且选择的样本点是随机的，每次迭代不使用已经用过的样本点。这样的方法，就有效地减少了计算量，并保证了回归效果。
+
+当数据集较小时，我们使用梯度上升算法
+当数据集较大时，我们使用改进的随机梯度上升算法
+
+Logistic回归的优缺点
+优点：实现简单，易于理解和实现；计算代价不高，速度很快，存储资源低。
+缺点：容易欠拟合，分类精度可能不高。
+
