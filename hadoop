@@ -3,3 +3,13 @@ hdfs是集群（分布式的负责文件读写），yarn也是集群（负责为
 hdfs集群中的leader是name node，小弟是data node，name node配置端口9000.
 yarn集群中的leader是resource manager，小弟是node manager，一般node manager与data node放在一块。resource manager与name node也可以放在一起，也可以
 分开。
+分布式文件系统启动命令 start-dfs.sh，再此之前需要先配置完成免密登录（使用ssh-keygen 生成秘钥，通过ssh-copy-id将秘钥拷贝到待访问主机）。
+
+通过编写java程序操作hdfs文件系统
+(1)首先需要导入jar包，需要在工程目录上点击右键，选择build path，然后选择配置build path，在弹出的对话框中选择add Library，然后选择user Library，在新弹出
+出的对话框中选择new，设置Library的名称，选中名称，然后添加jar包。
+(2)操作时，在G盘目录下，解压出来一个hadoop2.6.1文件夹，里面的bin和lib目录下的内容，需要在操作文件系统是用到，此时为了系统(windows)可以找到，需要配置环境
+变量，首先添加HADOOP_HOME变量(hadoop2.6.1文件夹所在路径)，然后在PATH变量中添加bin目录路径(这里遇到配置之后调用报错的问题，猜测是因为修改的环境变量没有
+加载到eclipse环境中，关闭eclipse后，程序运行正常)。
+(3)默认使用的文件系统是本地文件系统，因此需要配置参数，fs.defaultFS=hdfs://hostname:9000,配置后采用配置的namenode地址对应的文件系统，运行时会出现权限
+问题，此时需要配置运行参数-DHADOOP_USER_NAME=hadoop，之后程序工作正常，可以完成上传下载功能。
