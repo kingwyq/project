@@ -9,3 +9,258 @@
 局部加权线性回归
 线性回归的一个问题是有可能出现欠拟合现象，因为它求的是具有小均方误差的无偏估 计。显而易见，如果模型欠拟合将不能取得好的预测效果。所以有些方法允许在估计中
 引入一 些偏差，从而降低预测的均方误差。
+
+岭回归
+针对数据的特征比样本点多的情况，此时我们不能再使用上文的方法进行计算了，因为矩阵X不是满秩矩阵，非满秩矩阵在求逆时会出现问题。
+因为r(AB)<=min(r(A),r(B)),因此X.T*X在数据的特征比样本点多时，会不可逆。公式无法使用。
+岭回归即我们所说的L2正则线性回归，在一般的线性回归最小化均方误差的基础上增加了一个参数w的L2范数的罚项，从而最小化罚项残差平方和。
+简单说来，岭回归就是在普通线性回归的基础上引入单位矩阵。回归系数的计算公式变形如下：
+  w=(X.T*X+λI)-1*X.T*y
+式中，矩阵I是一个mxm的单位矩阵，加上一个λI从而使得矩阵非奇异，进而能对矩阵求逆。
+
+为了使用岭回归和缩减技术，首先需要对特征做标准化处理。因为，我们需要使每个维度特征具有相同的重要性。本文使用的标准化处理比较简单，就是将所有特征都减去各自
+的均值并除以方差。
+
+前向逐步线性回归
+前向逐步线性回归算法属于一种贪心算法，即每一步都尽可能减少误差。我们计算回归系数，不再是通过公式计算，而是通过每次微调各个回归系数，然后计算预测误差。那个
+使误差最小的一组回归系数，就是我们需要的最佳回归系数。
+# -*-coding:utf-8 -*-
+from matplotlib.font_manager import FontProperties
+import matplotlib.pyplot as plt
+import numpy as np
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        xArr - x数据集
+        yArr - y数据集
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-11-20
+    """
+    numFeat = len(open(fileName).readline().split('\t')) - 1
+    xArr = []; yArr = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr =[]
+        curLine = line.strip().split('\t')
+        for i in range(numFeat):
+            lineArr.append(float(curLine[i]))
+        xArr.append(lineArr)
+        yArr.append(float(curLine[-1]))
+    return xArr, yArr
+
+def regularize(xMat, yMat):
+    """
+    函数说明:数据标准化
+    Parameters:
+        xMat - x数据集
+        yMat - y数据集
+    Returns:
+        inxMat - 标准化后的x数据集
+        inyMat - 标准化后的y数据集
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-11-23
+    """    
+    inxMat = xMat.copy()                                                        #数据拷贝
+    inyMat = yMat.copy()
+    yMean = np.mean(yMat, 0)                                                    #行与行操作，求均值
+    inyMat = yMat - yMean                                                        #数据减去均值
+    inMeans = np.mean(inxMat, 0)                                                   #行与行操作，求均值
+    inVar = np.var(inxMat, 0)                                                     #行与行操作，求方差
+    inxMat = (inxMat - inMeans) / inVar                                            #数据减去均值除以方差实现标准化
+    return inxMat, inyMat
+
+def rssError(yArr,yHatArr):
+    """
+    函数说明:计算平方误差
+    Parameters:
+        yArr - 预测值
+        yHatArr - 真实值
+    Returns:
+        
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-11-23
+    """
+    return ((yArr-yHatArr)**2).sum()
+def stageWise(xArr, yArr, eps = 0.01, numIt = 100):
+    """
+    函数说明:前向逐步线性回归
+    Parameters:
+        xArr - x输入数据
+        yArr - y预测数据
+        eps - 每次迭代需要调整的步长
+        numIt - 迭代次数
+    Returns:
+        returnMat - numIt次迭代的回归系数矩阵
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-03
+    """
+    xMat = np.mat(xArr); yMat = np.mat(yArr).T                                         #数据集
+    xMat, yMat = regularize(xMat, yMat)                                                #数据标准化
+    m, n = np.shape(xMat)
+    returnMat = np.zeros((numIt, n))                                                #初始化numIt次迭代的回归系数矩阵
+    ws = np.zeros((n, 1))                                                            #初始化回归系数矩阵
+    wsTest = ws.copy()
+    wsMax = ws.copy()
+    for i in range(numIt):                                                            #迭代numIt次
+        # print(ws.T)                                                                    #打印当前回归系数矩阵
+        lowestError = float('inf');                                                 #正无穷
+        for j in range(n):                                                            #遍历每个特征的回归系数
+            for sign in [-1, 1]:
+                wsTest = ws.copy()
+                wsTest[j] += eps * sign                                                #微调回归系数
+                yTest = xMat * wsTest                                                #计算预测值
+                rssE = rssError(yMat.A, yTest.A)                                    #计算平方误差
+                if rssE < lowestError:                                                #如果误差更小，则更新当前的最佳回归系数
+                    lowestError = rssE
+                    wsMax = wsTest
+        ws = wsMax.copy()
+        returnMat[i,:] = ws.T                                                         #记录numIt次迭代的回归系数矩阵
+    return returnMat
+def plotstageWiseMat():
+    """
+    函数说明:绘制岭回归系数矩阵
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-11-20
+    """
+    font = FontProperties(fname=r"c:\windows\fonts\simsun.ttc", size=14)
+    xArr, yArr = loadDataSet('abalone.txt')
+    returnMat = stageWise(xArr, yArr, 0.005, 1000)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(returnMat)    
+    ax_title_text = ax.set_title(u'前向逐步回归:迭代次数与回归系数的关系', FontProperties = font)
+    ax_xlabel_text = ax.set_xlabel(u'迭代次数', FontProperties = font)
+    ax_ylabel_text = ax.set_ylabel(u'回归系数', FontProperties = font)
+    plt.setp(ax_title_text, size = 15, weight = 'bold', color = 'red')
+    plt.setp(ax_xlabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.setp(ax_ylabel_text, size = 10, weight = 'bold', color = 'black')
+    plt.show()
+if __name__ == '__main__':
+    plotstageWiseMat()
+    
+我们打印了迭代次数与回归系数的关系曲线。可以看到，有些系数从始至终都是约为0的，这说明它们不对目标造成任何影响，也就是说这些特征很可能是不需要的。逐步线
+性回归算法的优点在于它可以帮助人们理解有的模型并做出改进。当构建了一个模型后，可以运行该算法找出重要的特征，这样就有可能及时停止对那些不重要特征的收集
+。
+缩减方法（逐步线性回归或岭回归），就是将一些系数缩减成很小的值或者直接缩减为0。这样做，就增大了模型的偏差（减少了一些特征的权重），通过把一些特征的回归
+系数缩减到0，同时也就减少了模型的复杂度。消除了多余的特征之后，模型更容易理解，同时也降低了预测误差。但是当缩减过于严厉的时候，就会出现过拟合的现象，即
+用训练集预测结果很好，用测试集预测就糟糕很多。
+
+使用sklearn
+# -*-coding:utf-8 -*-
+import numpy as np
+from bs4 import BeautifulSoup
+import random
+
+def scrapePage(retX, retY, inFile, yr, numPce, origPrc):
+    """
+    函数说明:从页面读取数据，生成retX和retY列表
+    Parameters:
+        retX - 数据X
+        retY - 数据Y
+        inFile - HTML文件
+        yr - 年份
+        numPce - 乐高部件数目
+        origPrc - 原价
+    Returns:
+        无
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-03
+    """
+    # 打开并读取HTML文件
+    with open(inFile, encoding='utf-8') as f:
+        html = f.read()
+    soup = BeautifulSoup(html)
+    i = 1
+    # 根据HTML页面结构进行解析
+    currentRow = soup.find_all('table', r = "%d" % i)
+    while(len(currentRow) != 0):
+        currentRow = soup.find_all('table', r = "%d" % i)
+        title = currentRow[0].find_all('a')[1].text
+        lwrTitle = title.lower()
+        # 查找是否有全新标签
+        if (lwrTitle.find('new') > -1) or (lwrTitle.find('nisb') > -1):
+            newFlag = 1.0
+        else:
+            newFlag = 0.0
+        # 查找是否已经标志出售，我们只收集已出售的数据
+        soldUnicde = currentRow[0].find_all('td')[3].find_all('span')
+        if len(soldUnicde) == 0:
+            print("商品 #%d 没有出售" % i)
+        else:
+            # 解析页面获取当前价格
+            soldPrice = currentRow[0].find_all('td')[4]
+            priceStr = soldPrice.text
+            priceStr = priceStr.replace('$','')
+            priceStr = priceStr.replace(',','')
+            if len(soldPrice) > 1:
+                priceStr = priceStr.replace('Free shipping', '')
+            sellingPrice = float(priceStr)
+            # 去掉不完整的套装价格
+            if  sellingPrice > origPrc * 0.5:
+                print("%d\t%d\t%d\t%f\t%f" % (yr, numPce, newFlag, origPrc, sellingPrice))
+                retX.append([yr, numPce, newFlag, origPrc])
+                retY.append(sellingPrice)
+        i += 1
+        currentRow = soup.find_all('table', r = "%d" % i)
+
+def setDataCollect(retX, retY):
+    """
+    函数说明:依次读取六种乐高套装的数据，并生成数据矩阵
+    Parameters:
+        无
+    Returns:
+        无
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-03
+    """
+    scrapePage(retX, retY, './lego/lego8288.html', 2006, 800, 49.99)                #2006年的乐高8288,部件数目800,原价49.99
+    scrapePage(retX, retY, './lego/lego10030.html', 2002, 3096, 269.99)                #2002年的乐高10030,部件数目3096,原价269.99
+    scrapePage(retX, retY, './lego/lego10179.html', 2007, 5195, 499.99)                #2007年的乐高10179,部件数目5195,原价499.99
+    scrapePage(retX, retY, './lego/lego10181.html', 2007, 3428, 199.99)                #2007年的乐高10181,部件数目3428,原价199.99
+    scrapePage(retX, retY, './lego/lego10189.html', 2008, 5922, 299.99)                #2008年的乐高10189,部件数目5922,原价299.99
+    scrapePage(retX, retY, './lego/lego10196.html', 2009, 3263, 249.99)                #2009年的乐高10196,部件数目3263,原价249.99
+
+def usesklearn():
+    """
+    函数说明:使用sklearn
+    Parameters:
+        无
+    Returns:
+        无
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-08
+    """
+    from sklearn import linear_model
+    reg = linear_model.Ridge(alpha = .5)
+    lgX = []
+    lgY = []
+    setDataCollect(lgX, lgY)
+    reg.fit(lgX, lgY)
+    print('%f%+f*年份%+f*部件数量%+f*是否为全新%+f*原价' % (reg.intercept_, reg.coef_[0], reg.coef_[1], reg.coef_[2], reg.coef_[3]))    
+
+if __name__ == '__main__':
+    usesklearn()
+
+与分类一样，回归也是预测目标值的过程。回归与分类的不同点在于，前者预测连续类型变量，而后者预测离散类型变量。
+岭回归是缩减法的一种，相当于对回归系数的大小施加了限制。另一种很好的缩减法是lasso。lasso难以求解，但可以使用计算简便的逐步线性回归方法求的近似解。
+缩减法还可以看做是对一个模型增加偏差的同时减少方法。
+
