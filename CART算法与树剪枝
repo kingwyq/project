@@ -1,0 +1,453 @@
+决策树不断将数据切分成小数据集，直到所有目标标量完全相同，或者数据不能再切分为止。决策树是一种贪心算法，它要在给定时间内做出最佳选择，但不关心能否达到全局
+最优。
+ID3算法的弊端
+决策树的树构建算法是ID3。ID3的做法是每次选取当前最佳的特征来分割数据，并按照该特征的所有可能取值来切分。也就是说，如果一个特征有4种取值，那么数据将被切分
+成4份。一旦按某特征切分后，该特征在之后的算法执行过程中将不会再起作用，所以有观点认为这种切分方式过于迅速。
+除了切分过于迅速外，ID3算法还存在另一个问题，它不能直接处理连续型特征。只有事先将连续型特征离散化，才能在ID3算法中使用。但这种转换过程会破坏连续型变量的
+内在特性。
+CART算法
+与ID3算法相反，CART算法正好适用于连续型特征。CART算法使用二元切分法来处理连续型变量。而使用二元切分法则易于对树构建过程进行调整以处理连续型特征。具体的处
+理方法是：如果特征值大于给定值就走左子树，否则就走右子树。
+CART算法有两步：
+(1)决策树生成：递归地构建二叉决策树的过程，基于训练数据集生成决策树，生成的决策树要尽量大；自上而下从根开始建立节点，在每个节点处要选择一个最好的属性来分
+裂，使得子节点中的训练集尽量的纯。不同的算法使用不同的指标来定义"最好"
+(2)决策树剪枝：用验证数据集对已生成的树进行剪枝并选择最优子树，这时损失函数最小作为剪枝的标准。
+
+后剪枝： 
+（1）后剪枝是在用训练集构建好一颗决策树后，利用测试集进行的操作。 
+（2）算法： 
+基于已有的树切分测试数据： 
+1.如果存在任一子集是一棵树，则在该子集递归剪枝过程 
+2.计算不合并的误差 
+3.如果合并会降低误差的话，就将叶节点合并 
+（3）在回归树一般用总方差计算误差（即用叶子节点的值减去所有叶子节点的均值）。
+
+对于完全决策树中的每一个非叶子节点的子树，我们尝试着把它替换成一个叶子节点，该叶子节点的类别我们用子树所覆盖训练样本中存在最多的那个类来代替，这样就产生了
+一个简化决策树，然后比较这两个决策树在测试数据集中的表现，如果简化决策树在测试数据集中的错误比较少，那么该子树就可以替换成叶子节点。该算法以bottom-up的方
+式遍历所有的子树，直至没有任何子树可以替换使得测试数据集的表现得以改进时，算法就可以终止。
+
+根据切分的特征和特征值切分出两个数据集，然后将两个数据集分别用于左子树的构建和右子树的构建，直到无法找到切分的特征为止。因此，我们可以使用递归实现这个过程
+，编写代码如下：
+#-*- coding:utf-8 -*-
+import numpy as np
+
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        dataMat - 数据矩阵
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-09
+    """
+    dataMat = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        curLine = line.strip().split('\t')
+        fltLine = list(map(float, curLine))                    #转化为float类型
+        dataMat.append(fltLine)
+    return dataMat
+
+def binSplitDataSet(dataSet, feature, value):
+    """
+    函数说明:根据特征切分数据集合
+    Parameters:
+        dataSet - 数据集合
+        feature - 带切分的特征
+        value - 该特征的值
+    Returns:
+        mat0 - 切分的数据集合0
+        mat1 - 切分的数据集合1
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    mat0 = dataSet[np.nonzero(dataSet[:,feature] > value)[0],:]
+    mat1 = dataSet[np.nonzero(dataSet[:,feature] <= value)[0],:]
+    return mat0, mat1
+
+def regLeaf(dataSet):
+    """
+    函数说明:生成叶结点
+    Parameters:
+        dataSet - 数据集合
+    Returns:
+        目标变量的均值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    return np.mean(dataSet[:,-1])
+
+def regErr(dataSet):
+    """
+    函数说明:误差估计函数
+    Parameters:
+        dataSet - 数据集合
+    Returns:
+        目标变量的总方差
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    return np.var(dataSet[:,-1]) * np.shape(dataSet)[0]
+
+def chooseBestSplit(dataSet, leafType = regLeaf, errType = regErr, ops = (1,4)):
+    """
+    函数说明:找到数据的最佳二元切分方式函数
+    Parameters:
+        dataSet - 数据集合
+        leafType - 生成叶结点
+        regErr - 误差估计函数
+        ops - 用户定义的参数构成的元组
+    Returns:
+        bestIndex - 最佳切分特征
+        bestValue - 最佳特征值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    import types
+    #tolS允许的误差下降值,tolN切分的最少样本数
+    tolS = ops[0]; tolN = ops[1]
+    #如果当前所有值相等,则退出。(根据set的特性)
+    if len(set(dataSet[:,-1].T.tolist()[0])) == 1:
+        return None, leafType(dataSet)
+    #统计数据集合的行m和列n
+    m, n = np.shape(dataSet)
+    #默认最后一个特征为最佳切分特征,计算其误差估计
+    S = errType(dataSet)
+    #分别为最佳误差,最佳特征切分的索引值,最佳特征值
+    bestS = float('inf'); bestIndex = 0; bestValue = 0
+    #遍历所有特征列
+    for featIndex in range(n - 1):
+        #遍历所有特征值
+        for splitVal in set(dataSet[:,featIndex].T.A.tolist()[0]):
+            #根据特征和特征值切分数据集
+            mat0, mat1 = binSplitDataSet(dataSet, featIndex, splitVal)
+            #如果数据少于tolN,则退出
+            if (np.shape(mat0)[0] < tolN) or (np.shape(mat1)[0] < tolN): continue
+            #计算误差估计
+            newS = errType(mat0) + errType(mat1)
+            #如果误差估计更小,则更新特征索引值和特征值
+            if newS < bestS:
+                bestIndex = featIndex
+                bestValue = splitVal
+                bestS = newS
+    #如果误差减少不大则退出
+    if (S - bestS) < tolS:
+        return None, leafType(dataSet)
+    #根据最佳的切分特征和特征值切分数据集合
+    mat0, mat1 = binSplitDataSet(dataSet, bestIndex, bestValue)
+    #如果切分出的数据集很小则退出
+    if (np.shape(mat0)[0] < tolN) or (np.shape(mat1)[0] < tolN):
+        return None, leafType(dataSet)
+    #返回最佳切分特征和特征值
+    return bestIndex, bestValue
+
+def createTree(dataSet, leafType = regLeaf, errType = regErr, ops = (1, 4)):
+    """
+    函数说明:树构建函数
+    Parameters:
+        dataSet - 数据集合
+        leafType - 建立叶结点的函数
+        errType - 误差计算函数
+        ops - 包含树构建所有其他参数的元组
+    Returns:
+        retTree - 构建的回归树
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    #选择最佳切分特征和特征值
+    feat, val = chooseBestSplit(dataSet, leafType, errType, ops)
+    #r如果没有特征,则返回特征值
+    if feat == None: return val
+    #回归树
+    retTree = {}
+    retTree['spInd'] = feat
+    retTree['spVal'] = val
+    #分成左数据集和右数据集
+    lSet, rSet = binSplitDataSet(dataSet, feat, val)
+    #创建左子树和右子树
+    retTree['left'] = createTree(lSet, leafType, errType, ops)
+    retTree['right'] = createTree(rSet, leafType, errType, ops)
+    return retTree  
+
+if __name__ == '__main__':
+    myDat = loadDataSet('ex00.txt')
+    myMat = np.mat(myDat)
+    print(createTree(myMat))
+    
+设置tolS和tolN就是一种预剪枝操作。另一种形式的剪枝需要使用测试集和训练集，称作后剪枝（postpruning）。本节将分析后剪枝的有效性，但首先来看一下预剪枝的
+不足之处。
+
+后剪枝
+#-*- coding:utf-8 -*-
+import matplotlib.pyplot as plt
+import numpy as np
+
+def loadDataSet(fileName):
+    """
+    函数说明:加载数据
+    Parameters:
+        fileName - 文件名
+    Returns:
+        dataMat - 数据矩阵
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-09
+    """
+    dataMat = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        curLine = line.strip().split('\t')
+        fltLine = list(map(float, curLine))                    #转化为float类型
+        dataMat.append(fltLine)
+    return dataMat
+
+def plotDataSet(filename):
+    """
+    函数说明:绘制数据集
+    Parameters:
+        filename - 文件名
+    Returns:
+        无
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-11-12
+    """
+    dataMat = loadDataSet(filename)                                        #加载数据集
+    n = len(dataMat)                                                    #数据个数
+    xcord = []; ycord = []                                                #样本点
+    for i in range(n):                                                    
+        xcord.append(dataMat[i][0]); ycord.append(dataMat[i][1])        #样本点
+    fig = plt.figure()
+    ax = fig.add_subplot(111)                                            #添加subplot
+    ax.scatter(xcord, ycord, s = 20, c = 'blue',alpha = .5)                #绘制样本点
+    plt.title('DataSet')                                                #绘制title
+    plt.xlabel('X')
+    plt.show()
+
+def binSplitDataSet(dataSet, feature, value):
+    """
+    函数说明:根据特征切分数据集合
+    Parameters:
+        dataSet - 数据集合
+        feature - 带切分的特征
+        value - 该特征的值
+    Returns:
+        mat0 - 切分的数据集合0
+        mat1 - 切分的数据集合1
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    mat0 = dataSet[np.nonzero(dataSet[:,feature] > value)[0],:]
+    mat1 = dataSet[np.nonzero(dataSet[:,feature] <= value)[0],:]
+    return mat0, mat1
+
+def regLeaf(dataSet):
+    """
+    函数说明:生成叶结点
+    Parameters:
+        dataSet - 数据集合
+    Returns:
+        目标变量的均值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    return np.mean(dataSet[:,-1])
+
+def regErr(dataSet):
+    """
+    函数说明:误差估计函数
+    Parameters:
+        dataSet - 数据集合
+    Returns:
+        目标变量的总方差
+    Website:
+    https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    return np.var(dataSet[:,-1]) * np.shape(dataSet)[0]
+
+def chooseBestSplit(dataSet, leafType = regLeaf, errType = regErr, ops = (1,4)):
+    """
+    函数说明:找到数据的最佳二元切分方式函数
+    Parameters:
+        dataSet - 数据集合
+        leafType - 生成叶结点
+        regErr - 误差估计函数
+        ops - 用户定义的参数构成的元组
+    Returns:
+        bestIndex - 最佳切分特征
+        bestValue - 最佳特征值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    import types
+    #tolS允许的误差下降值,tolN切分的最少样本数
+    tolS = ops[0]; tolN = ops[1]
+    #如果当前所有值相等,则退出。(根据set的特性)
+    if len(set(dataSet[:,-1].T.tolist()[0])) == 1:
+        return None, leafType(dataSet)
+    #统计数据集合的行m和列n
+    m, n = np.shape(dataSet)
+    #默认最后一个特征为最佳切分特征,计算其误差估计
+    S = errType(dataSet)
+    #分别为最佳误差,最佳特征切分的索引值,最佳特征值
+    bestS = float('inf'); bestIndex = 0; bestValue = 0
+    #遍历所有特征列
+    for featIndex in range(n - 1):
+        #遍历所有特征值
+        for splitVal in set(dataSet[:,featIndex].T.A.tolist()[0]):
+            #根据特征和特征值切分数据集
+            mat0, mat1 = binSplitDataSet(dataSet, featIndex, splitVal)
+            #如果数据少于tolN,则退出
+            if (np.shape(mat0)[0] < tolN) or (np.shape(mat1)[0] < tolN): continue
+            #计算误差估计
+            newS = errType(mat0) + errType(mat1)
+            #如果误差估计更小,则更新特征索引值和特征值
+            if newS < bestS:
+                bestIndex = featIndex
+                bestValue = splitVal
+                bestS = newS
+    #如果误差减少不大则退出
+    if (S - bestS) < tolS:
+        return None, leafType(dataSet)
+    #根据最佳的切分特征和特征值切分数据集合
+    mat0, mat1 = binSplitDataSet(dataSet, bestIndex, bestValue)
+    #如果切分出的数据集很小则退出
+    if (np.shape(mat0)[0] < tolN) or (np.shape(mat1)[0] < tolN):
+        return None, leafType(dataSet)
+    #返回最佳切分特征和特征值
+    return bestIndex, bestValue
+
+def createTree(dataSet, leafType = regLeaf, errType = regErr, ops = (1, 4)):
+    """
+    函数说明:树构建函数
+    Parameters:
+        dataSet - 数据集合
+        leafType - 建立叶结点的函数
+        errType - 误差计算函数
+        ops - 包含树构建所有其他参数的元组
+    Returns:
+        retTree - 构建的回归树
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-12
+    """
+    #选择最佳切分特征和特征值
+    feat, val = chooseBestSplit(dataSet, leafType, errType, ops)
+    #r如果没有特征,则返回特征值
+    if feat == None: return val
+    #回归树
+    retTree = {}
+    retTree['spInd'] = feat
+    retTree['spVal'] = val
+    #分成左数据集和右数据集
+    lSet, rSet = binSplitDataSet(dataSet, feat, val)
+    #创建左子树和右子树
+    retTree['left'] = createTree(lSet, leafType, errType, ops)
+    retTree['right'] = createTree(rSet, leafType, errType, ops)
+    return retTree  
+
+def isTree(obj):
+    """
+    函数说明:判断测试输入变量是否是一棵树
+    Parameters:
+        obj - 测试对象
+    Returns:
+        是否是一棵树
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-14
+    """
+    import types
+    return (type(obj).__name__ == 'dict')
+
+def getMean(tree):
+    """
+    函数说明:对树进行塌陷处理(即返回树平均值)
+    Parameters:
+        tree - 树
+    Returns:
+        树的平均值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-14
+    """
+    if isTree(tree['right']): tree['right'] = getMean(tree['right'])
+    if isTree(tree['left']): tree['left'] = getMean(tree['left'])
+    return (tree['left'] + tree['right']) / 2.0
+
+def prune(tree, testData):
+    """
+    函数说明:后剪枝
+    Parameters:
+        tree - 树
+        test - 测试集
+    Returns:
+        树的平均值
+    Website:
+        https://www.cuijiahua.com/
+    Modify:
+        2017-12-14
+    """
+    #如果测试集为空,则对树进行塌陷处理
+    if np.shape(testData)[0] == 0: return getMean(tree)
+    #如果有左子树或者右子树,则切分数据集
+    if (isTree(tree['right']) or isTree(tree['left'])):
+        lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
+    #处理左子树(剪枝)
+    if isTree(tree['left']): tree['left'] = prune(tree['left'], lSet)
+    #处理右子树(剪枝)
+    if isTree(tree['right']): tree['right'] =  prune(tree['right'], rSet)
+    #如果当前结点的左右结点为叶结点
+    if not isTree(tree['left']) and not isTree(tree['right']):
+        lSet, rSet = binSplitDataSet(testData, tree['spInd'], tree['spVal'])
+        #计算没有合并的误差
+        errorNoMerge = np.sum(np.power(lSet[:,-1] - tree['left'],2)) + np.sum(np.power(rSet[:,-1] - tree['right'],2))
+        #计算合并的均值
+        treeMean = (tree['left'] + tree['right']) / 2.0
+        #计算合并的误差
+        errorMerge = np.sum(np.power(testData[:,-1] - treeMean, 2))
+        #如果合并的误差小于没有合并的误差,则合并
+        if errorMerge < errorNoMerge:
+            return treeMean
+        else: return tree
+    else: return tree
+
+if __name__ == '__main__':
+    train_filename = 'ex2.txt'
+    train_Data = loadDataSet(train_filename)
+    train_Mat = np.mat(train_Data)
+    tree = createTree(train_Mat)
+    print(tree)
+    test_filename = 'ex2test.txt'
+    test_Data = loadDataSet(test_filename)
+    test_Mat = np.mat(test_Data)
+    print(prune(tree, test_Mat))
+    
+CART算法可以用于构建二元树并处理离散型或连续型数据的切分。若使用不同的误差准则，就可以通过CART算法构建模型树和回归树。
+一颗过拟合的树常常十分复杂，剪枝技术的出现就是为了解决这个问题。两种剪枝方法分别是预剪枝和后剪枝，预剪枝更有效但需要用户定义一些参数。
