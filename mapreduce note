@@ -1,0 +1,11 @@
+mapreduce是分布式计算编程模型，该模型分为两个阶段：map阶段和reduce阶段，map阶段处理map task，reduce阶段处理reduce task。
+(1)多个机器上的map task并行处理各自的数据block，产生各自的结果。
+(2)每个map task完成后将结果交给reduce task进行结果汇总，不同的任务reduce task需要处理的对应map task的结果是不同的。
+此时会产生如下问题：
+(1)map task数据块分配
+(2)reduce task任务分配
+(3)map task产生的结果该交给哪个reduce task处理
+(4)当其中一个map task没有执行成功，此时该怎么办。
+为了解决对应的问题，需要有一个主管来协调，此主管在map reduce编程模型中叫做application master
+application master主要负责为启动map task,为map task分配需要处理的数据块，对于各机器上map task执行后产生的结果该交给哪个reduce task处理，由application
+master负责分配，对于某些map task执行不成功的情况，由application master负责监控，一但发生，application master会在其他机器上启动map task处理对应数据块。
