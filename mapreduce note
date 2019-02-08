@@ -9,3 +9,16 @@ mapreduce是分布式计算编程模型，该模型分为两个阶段：map阶�
 为了解决对应的问题，需要有一个主管来协调，此主管在map reduce编程模型中叫做application master
 application master主要负责为启动map task,为map task分配需要处理的数据块，对于各机器上map task执行后产生的结果该交给哪个reduce task处理，由application
 master负责分配，对于某些map task执行不成功的情况，由application master负责监控，一但发生，application master会在其他机器上启动map task处理对应数据块。
+
+mapreduce 应用
+mapreduce编程需要实现mapper和reducer接口，完成代码逻辑
+mapper层主要实现将给定文本中的内容按行读取，以key,value的形式传给用户重写的方法，其中key是偏移量，value是读取的一行文本的内容，这里key，value的类型是
+hadoop中的序列化类型，按照业务类型实现逻辑后，将输出同样以key，value的形式表示。输出首先写入到context对象中，根据需要，mapper输出分区可以分为多个，默认情况
+下分区最多三个，是由默认的hashPartioner方法决定的，因此如果要自定义分区的数量需要重新实现partioner接口，新的方式是extends partioner，只需要重写其中的
+getPartioner方法，该方法返回整数，即分区号。
+reducer层接收key，value，输出key，value，接收到的key，value，是mapper层的输出，mapper层可以将不同输出分区的内容交给不同的reducer，reducer接收到的
+key不重复（可以这样理解），value是一个Iteratorable，输出的value可以是自定义对象（根据业务需求而定）,当然当定义为自定义输出对象时，应该重写toString方法
+，这样可以保证最后的输出是以文本的方式。同时还应该让自定义对象实现hadoop的序列化接口，Writable（对象需要序列化后在进行传输，在接收端反序列化）。reducer
+task默认情况下只启动一个，此时因该通过设置job对象的参数根据业务要求自定义数量（更改reducer task的数量一般要指定mapper输出分区划分的实现类）。
+mapreduce总的main方法主要完成任务分配，任务提交。
+主要给yarn提交数据切片信息，job.xml，jar包，数据切片数量决定map task的数量，job.xml是任务执行的一些参数设置，jar包主要包含是用户任务逻辑实现。
