@@ -1,18 +1,19 @@
-1.×¼±¸Linux»·¾³
-	1.0ÏÈ½«ĞéÄâ»úµÄÍøÂçÄ£Ê½Ñ¡ÎªNAT
+ï¼ˆlinuxè™šæ‹Ÿæœºï¼‰å…‹éš†å¾—åˆ°çš„è™šæ‹Ÿæœºä¿®æ”¹ç½‘å¡ä¿¡æ¯å’ŒIPåœ°å€ï¼Œä»¥åŠDNSï¼šhttps://github.com/kingwyq/project/edit/master/hadoop2.6.4%E9%9B%86%E7%BE%A4%E6%90%AD%E5%BB%BA.txt
+1.å‡†å¤‡Linuxç¯å¢ƒ
+	1.0å…ˆå°†è™šæ‹Ÿæœºçš„ç½‘ç»œæ¨¡å¼é€‰ä¸ºNAT
 		
-	1.1ĞŞ¸ÄÖ÷»úÃû
+	1.1ä¿®æ”¹ä¸»æœºå
 		vi /etc/sysconfig/network
 		
 		NETWORKING=yes
 		HOSTNAME=itcast    ###
 
-	1.2ĞŞ¸ÄIP
-		Á½ÖÖ·½Ê½£º
-		µÚÒ»ÖÖ£ºÍ¨¹ıLinuxÍ¼ĞÎ½çÃæ½øĞĞĞŞ¸Ä£¨Ç¿ÁÒÍÆ¼ö£©
-			½øÈëLinuxÍ¼ĞÎ½çÃæ -> ÓÒ¼üµã»÷ÓÒÉÏ·½µÄÁ½¸öĞ¡µçÄÔ -> µã»÷Edit connections -> Ñ¡ÖĞµ±Ç°ÍøÂçSystem eth0 -> µã»÷edit°´Å¥ -> Ñ¡ÔñIPv4 -> methodÑ¡ÔñÎªmanual -> µã»÷add°´Å¥ -> Ìí¼ÓIP£º192.168.1.101 ×ÓÍøÑÚÂë£º255.255.255.0 Íø¹Ø£º192.168.1.1 -> apply
+	1.2ä¿®æ”¹IP
+		ä¸¤ç§æ–¹å¼ï¼š
+		ç¬¬ä¸€ç§ï¼šé€šè¿‡Linuxå›¾å½¢ç•Œé¢è¿›è¡Œä¿®æ”¹ï¼ˆå¼ºçƒˆæ¨èï¼‰
+			è¿›å…¥Linuxå›¾å½¢ç•Œé¢ -> å³é”®ç‚¹å‡»å³ä¸Šæ–¹çš„ä¸¤ä¸ªå°ç”µè„‘ -> ç‚¹å‡»Edit connections -> é€‰ä¸­å½“å‰ç½‘ç»œSystem eth0 -> ç‚¹å‡»editæŒ‰é’® -> é€‰æ‹©IPv4 -> methodé€‰æ‹©ä¸ºmanual -> ç‚¹å‡»addæŒ‰é’® -> æ·»åŠ IPï¼š192.168.1.101 å­ç½‘æ©ç ï¼š255.255.255.0 ç½‘å…³ï¼š192.168.1.1 -> apply
 	
-		µÚ¶şÖÖ£ºĞŞ¸ÄÅäÖÃÎÄ¼ş·½Ê½£¨ŒÅË¿³ÌĞòÔ³×¨ÓÃ£©
+		ç¬¬äºŒç§ï¼šä¿®æ”¹é…ç½®æ–‡ä»¶æ–¹å¼ï¼ˆå±Œä¸ç¨‹åºçŒ¿ä¸“ç”¨ï¼‰
 			vim /etc/sysconfig/network-scripts/ifcfg-eth0
 			
 			DEVICE="eth0"
@@ -27,31 +28,31 @@
 			NETMASK="255.255.255.0"          ###
 			GATEWAY="192.168.1.1"            ###
 			
-	1.3ĞŞ¸ÄÖ÷»úÃûºÍIPµÄÓ³Éä¹ØÏµ
+	1.3ä¿®æ”¹ä¸»æœºåå’ŒIPçš„æ˜ å°„å…³ç³»
 		vim /etc/hosts
 			
 		192.168.1.101	itcast
 	
-	1.4¹Ø±Õ·À»ğÇ½
-		#²é¿´·À»ğÇ½×´Ì¬
+	1.4å…³é—­é˜²ç«å¢™
+		#æŸ¥çœ‹é˜²ç«å¢™çŠ¶æ€
 		service iptables status
-		#¹Ø±Õ·À»ğÇ½
+		#å…³é—­é˜²ç«å¢™
 		service iptables stop
-		#²é¿´·À»ğÇ½¿ª»úÆô¶¯×´Ì¬
+		#æŸ¥çœ‹é˜²ç«å¢™å¼€æœºå¯åŠ¨çŠ¶æ€
 		chkconfig iptables --list
-		#¹Ø±Õ·À»ğÇ½¿ª»úÆô¶¯
+		#å…³é—­é˜²ç«å¢™å¼€æœºå¯åŠ¨
 		chkconfig iptables off
-	1.5 ĞŞ¸Äsudo
+	1.5 ä¿®æ”¹sudo
 		su root
 		vim /etc/sudoers
-		¸øhadoopÓÃ»§Ìí¼ÓÖ´ĞĞµÄÈ¨ÏŞ
+		ç»™hadoopç”¨æˆ·æ·»åŠ æ‰§è¡Œçš„æƒé™
 
-¹Ø±Õlinux·şÎñÆ÷µÄÍ¼ĞÎ½çÃæ£º
+å…³é—­linuxæœåŠ¡å™¨çš„å›¾å½¢ç•Œé¢ï¼š
 vi /etc/inittab 
 
 
 	
-	1.5ÖØÆôLinux
+	1.5é‡å¯Linux
 		reboot
 
 
@@ -59,84 +60,84 @@ vi /etc/inittab
 
 
 
-2.°²×°JDK
-	2.1ÉÏ´«alt+p ºó³öÏÖsftp´°¿Ú£¬È»ºóput d:\xxx\yy\ll\jdk-7u_65-i585.tar.gz
+2.å®‰è£…JDK
+	2.1ä¸Šä¼ alt+p åå‡ºç°sftpçª—å£ï¼Œç„¶åput d:\xxx\yy\ll\jdk-7u_65-i585.tar.gz
 	
-	2.2½âÑ¹jdk
-		#´´½¨ÎÄ¼ş¼Ğ
+	2.2è§£å‹jdk
+		#åˆ›å»ºæ–‡ä»¶å¤¹
 		mkdir /home/hadoop/app
-		#½âÑ¹
+		#è§£å‹
 		tar -zxvf jdk-7u55-linux-i586.tar.gz -C /home/hadoop/app
 		
-	2.3½«javaÌí¼Óµ½»·¾³±äÁ¿ÖĞ
+	2.3å°†javaæ·»åŠ åˆ°ç¯å¢ƒå˜é‡ä¸­
 		vim /etc/profile
-		#ÔÚÎÄ¼ş×îºóÌí¼Ó
+		#åœ¨æ–‡ä»¶æœ€åæ·»åŠ 
 		export JAVA_HOME=/home/hadoop/app/jdk-7u_65-i585
 		export PATH=$PATH:$JAVA_HOME/bin
 	
-		#Ë¢ĞÂÅäÖÃ
+		#åˆ·æ–°é…ç½®
 		source /etc/profile
 		
-3.°²×°hadoop2.4.1
-	ÏÈÉÏ´«hadoopµÄ°²×°°üµ½·şÎñÆ÷ÉÏÈ¥/home/hadoop/
-	×¢Òâ£ºhadoop2.xµÄÅäÖÃÎÄ¼ş$HADOOP_HOME/etc/hadoop
-	Î±·Ö²¼Ê½ĞèÒªĞŞ¸Ä5¸öÅäÖÃÎÄ¼ş
-	3.1ÅäÖÃhadoop
-	µÚÒ»¸ö£ºhadoop-env.sh
+3.å®‰è£…hadoop2.4.1
+	å…ˆä¸Šä¼ hadoopçš„å®‰è£…åŒ…åˆ°æœåŠ¡å™¨ä¸Šå»/home/hadoop/
+	æ³¨æ„ï¼šhadoop2.xçš„é…ç½®æ–‡ä»¶$HADOOP_HOME/etc/hadoop
+	ä¼ªåˆ†å¸ƒå¼éœ€è¦ä¿®æ”¹5ä¸ªé…ç½®æ–‡ä»¶
+	3.1é…ç½®hadoop
+	ç¬¬ä¸€ä¸ªï¼šhadoop-env.sh
 		vim hadoop-env.sh
-		#µÚ27ĞĞ
-		export JAVA_HOME=/usr/java/jdk1.7.0_65     //½«${JAVA_HOME}ĞŞ¸ÄÎªjdk°²×°Â·¾¶
+		#ç¬¬27è¡Œ
+		export JAVA_HOME=/usr/java/jdk1.7.0_65     //å°†${JAVA_HOME}ä¿®æ”¹ä¸ºjdkå®‰è£…è·¯å¾„
 		
-	µÚ¶ş¸ö£ºcore-site.xml
+	ç¬¬äºŒä¸ªï¼šcore-site.xml
 
-		<!-- Ö¸¶¨HADOOPËùÊ¹ÓÃµÄÎÄ¼şÏµÍ³schema£¨URI£©£¬HDFSµÄÀÏ´ó£¨NameNode£©µÄµØÖ· -->
+		<!-- æŒ‡å®šHADOOPæ‰€ä½¿ç”¨çš„æ–‡ä»¶ç³»ç»Ÿschemaï¼ˆURIï¼‰ï¼ŒHDFSçš„è€å¤§ï¼ˆNameNodeï¼‰çš„åœ°å€ -->
 		<property>
 			<name>fs.defaultFS</name>
-			<value>hdfs://hostname:9000</value> //ÕâÀïµÄhostnameÊÇnamenodeËùÔÚÖ÷»úµÄÓòÃû£¬¸ÃÅäÖÃÎÄ¼şÔÚÃ¿Ì¨»úÆ÷ÉÏ¶¼Ò»Ñù£¬DataNode¿ÉÒÔ¸ù¾İÅäÖÃÎÄ¼şÕÒµ½namenode
+			<value>hdfs://hostname:9000</value> //è¿™é‡Œçš„hostnameæ˜¯namenodeæ‰€åœ¨ä¸»æœºçš„åŸŸåï¼Œè¯¥é…ç½®æ–‡ä»¶åœ¨æ¯å°æœºå™¨ä¸Šéƒ½ä¸€æ ·ï¼ŒDataNodeå¯ä»¥æ ¹æ®é…ç½®æ–‡ä»¶æ‰¾åˆ°namenode
 		</property>
-		<!-- Ö¸¶¨hadoopÔËĞĞÊ±²úÉúÎÄ¼şµÄ´æ´¢Ä¿Â¼ -->
+		<!-- æŒ‡å®šhadoopè¿è¡Œæ—¶äº§ç”Ÿæ–‡ä»¶çš„å­˜å‚¨ç›®å½• -->
 		<property>
 			<name>hadoop.tmp.dir</name>
-			<value>/home/hadoop/hadoop-2.4.1/tmp</value> //·Ö²¼Ê½ÎÄ¼şÏµÍ³Êı¾İµÄ´æ´¢Ä¿Â¼
+			<value>/home/hadoop/hadoop-2.4.1/tmp</value> //åˆ†å¸ƒå¼æ–‡ä»¶ç³»ç»Ÿæ•°æ®çš„å­˜å‚¨ç›®å½•
     </property>
 		
-	µÚÈı¸ö£ºhdfs-site.xml   
-		<!-- Ö¸¶¨HDFS¸±±¾µÄÊıÁ¿ -->
+	ç¬¬ä¸‰ä¸ªï¼šhdfs-site.xml   
+		<!-- æŒ‡å®šHDFSå‰¯æœ¬çš„æ•°é‡ -->
 		<property>
 			<name>dfs.replication</name>
 			<value>1</value>
 		</property>
 		
 		<property>
-			<name>dfs.secondary.http.address</name> //²»ÅäÖÃ£¬Ä¬ÈÏÎª0.0.0.0
+			<name>dfs.secondary.http.address</name> //ä¸é…ç½®ï¼Œé»˜è®¤ä¸º0.0.0.0
 			<value>192.168.1.152:50090</value>
 		</property>
 
     
     
 		
-	µÚËÄ¸ö£ºmapred-site.xml (mv mapred-site.xml.template mapred-site.xml)
+	ç¬¬å››ä¸ªï¼šmapred-site.xml (mv mapred-site.xml.template mapred-site.xml)
 		mv mapred-site.xml.template mapred-site.xml
 		vim mapred-site.xml
-		<!-- Ö¸¶¨mrÔËĞĞÔÚyarnÉÏ -->  //ÊµÏÖ·Ö²¼Ê½¼ÆËã±ØĞëÖ¸¶¨
+		<!-- æŒ‡å®šmrè¿è¡Œåœ¨yarnä¸Š -->  //å®ç°åˆ†å¸ƒå¼è®¡ç®—å¿…é¡»æŒ‡å®š
 		<property>
 			<name>mapreduce.framework.name</name>
 			<value>yarn</value>
 		</property>
 		
-	µÚÎå¸ö£ºyarn-site.xml
-		<!-- Ö¸¶¨YARNµÄÀÏ´ó£¨ResourceManager£©µÄµØÖ· -->
+	ç¬¬äº”ä¸ªï¼šyarn-site.xml
+		<!-- æŒ‡å®šYARNçš„è€å¤§ï¼ˆResourceManagerï¼‰çš„åœ°å€ -->
 		<property>
 			<name>yarn.resourcemanager.hostname</name>
 			<value>hostname</value>
 		</property>
-		<!-- reducer»ñÈ¡Êı¾İµÄ·½Ê½ -->
+		<!-- reducerè·å–æ•°æ®çš„æ–¹å¼ -->
 		<property>
 			<name>yarn.nodemanager.aux-services</name>
 			<value>mapreduce_shuffle</value>
 		</property>
      	
-	3.2½«hadoopÌí¼Óµ½»·¾³±äÁ¿
+	3.2å°†hadoopæ·»åŠ åˆ°ç¯å¢ƒå˜é‡
 	
 	vim /etc/proflie
 		export JAVA_HOME=/usr/java/jdk1.7.0_65
@@ -145,22 +146,22 @@ vi /etc/inittab
 
 	source /etc/profile
 	
-	3.3¸ñÊ½»¯namenode£¨ÊÇ¶Ônamenode½øĞĞ³õÊ¼»¯£©
+	3.3æ ¼å¼åŒ–namenodeï¼ˆæ˜¯å¯¹namenodeè¿›è¡Œåˆå§‹åŒ–ï¼‰
 		hdfs namenode -format (hadoop namenode -format)
 	
-	3.4ÊÖ¶¯Æô¶¯namenode£¬datanode
-		hadoop-damean satrt namenode //ÔÚ·ÅÖÃnamenodeµÄ»úÆ÷ÉÏÖ´ĞĞÃüÁî
-		hadoop-damean start datanode //ÔÚ·ÅÖÃdatanodeµÄ»úÆ÷ÉÏÖ´ĞĞÃüÁî	
-	3.4Æô¶¯hadoop
-		ÏÈÆô¶¯HDFS
-		sbin/start-dfs.sh //×Ô¶¯»¯½Å±¾Ò»´ÎĞÔÆô¶¯namenode£¬datanode£¬Í¨¹ıHADOOP_HPME/etc/hadoop/slavesÖ¸¶¨ÒªÆô¶¯datanodeµÄÓòÃû»òip
-		£¨×¢£ºÕâÀïÎªÁËÊ¡µôÃ¿´ÎÊäÃÜÂëµÄ²Ù×÷£¬¿ÉÒÔÔÚÖ´ĞĞÃüÁîÖ®Ç°£¬ÉèÖÃsshµÄÃâÃÜµÇÂ¼£¬ssh-keygenÉú³ÉÃØÔ¿£¬½«ÃØÔ¿¿½±´µ½ÆäËûĞèÒªÃâÃÜµÇÂ¼µÄÖ÷»ú£¬Ê¹ÓÃssh-copy-id ip/ÓòÃûÍê³É£©
+	3.4æ‰‹åŠ¨å¯åŠ¨namenodeï¼Œdatanode
+		hadoop-damean satrt namenode //åœ¨æ”¾ç½®namenodeçš„æœºå™¨ä¸Šæ‰§è¡Œå‘½ä»¤
+		hadoop-damean start datanode //åœ¨æ”¾ç½®datanodeçš„æœºå™¨ä¸Šæ‰§è¡Œå‘½ä»¤	
+	3.4å¯åŠ¨hadoop
+		å…ˆå¯åŠ¨HDFS
+		sbin/start-dfs.sh //è‡ªåŠ¨åŒ–è„šæœ¬ä¸€æ¬¡æ€§å¯åŠ¨namenodeï¼Œdatanodeï¼Œé€šè¿‡HADOOP_HPME/etc/hadoop/slavesæŒ‡å®šè¦å¯åŠ¨datanodeçš„åŸŸåæˆ–ip
+		ï¼ˆæ³¨ï¼šè¿™é‡Œä¸ºäº†çœæ‰æ¯æ¬¡è¾“å¯†ç çš„æ“ä½œï¼Œå¯ä»¥åœ¨æ‰§è¡Œå‘½ä»¤ä¹‹å‰ï¼Œè®¾ç½®sshçš„å…å¯†ç™»å½•ï¼Œssh-keygenç”Ÿæˆç§˜é’¥ï¼Œå°†ç§˜é’¥æ‹·è´åˆ°å…¶ä»–éœ€è¦å…å¯†ç™»å½•çš„ä¸»æœºï¼Œä½¿ç”¨ssh-copy-id ip/åŸŸåå®Œæˆï¼‰
 		
-		ÔÙÆô¶¯YARN
+		å†å¯åŠ¨YARN
 		sbin/start-yarn.sh
 		
-	3.5ÑéÖ¤ÊÇ·ñÆô¶¯³É¹¦
-		Ê¹ÓÃjpsÃüÁîÑéÖ¤
+	3.5éªŒè¯æ˜¯å¦å¯åŠ¨æˆåŠŸ
+		ä½¿ç”¨jpså‘½ä»¤éªŒè¯
 		27408 NameNode
 		28218 Jps
 		27643 SecondaryNameNode
@@ -168,27 +169,27 @@ vi /etc/inittab
 		27803 ResourceManager
 		27512 DataNode
 	
-		http://£¨namenodeËùÔÚÖ÷»úµÄip£©:50070 £¨HDFS¹ÜÀí½çÃæ£©
-		http://£¨namenodeËùÔÚÖ÷»úµÄip£©:8088 £¨MR¹ÜÀí½çÃæ£©
+		http://ï¼ˆnamenodeæ‰€åœ¨ä¸»æœºçš„ipï¼‰:50070 ï¼ˆHDFSç®¡ç†ç•Œé¢ï¼‰
+		http://ï¼ˆnamenodeæ‰€åœ¨ä¸»æœºçš„ipï¼‰:8088 ï¼ˆMRç®¡ç†ç•Œé¢ï¼‰
 		
-4.ÅäÖÃsshÃâµÇÂ½
-	#Éú³ÉsshÃâµÇÂ½ÃÜÔ¿
-	#½øÈëµ½ÎÒµÄhomeÄ¿Â¼
+4.é…ç½®sshå…ç™»é™†
+	#ç”Ÿæˆsshå…ç™»é™†å¯†é’¥
+	#è¿›å…¥åˆ°æˆ‘çš„homeç›®å½•
 	cd ~/.ssh
 
-	ssh-keygen -t rsa £¨ËÄ¸ö»Ø³µ£©
-	Ö´ĞĞÍêÕâ¸öÃüÁîºó£¬»áÉú³ÉÁ½¸öÎÄ¼şid_rsa£¨Ë½Ô¿£©¡¢id_rsa.pub£¨¹«Ô¿£©
-	½«¹«Ô¿¿½±´µ½ÒªÃâÃÜµÇÂ½µÄÄ¿±ê»úÆ÷ÉÏ
+	ssh-keygen -t rsa ï¼ˆå››ä¸ªå›è½¦ï¼‰
+	æ‰§è¡Œå®Œè¿™ä¸ªå‘½ä»¤åï¼Œä¼šç”Ÿæˆä¸¤ä¸ªæ–‡ä»¶id_rsaï¼ˆç§é’¥ï¼‰ã€id_rsa.pubï¼ˆå…¬é’¥ï¼‰
+	å°†å…¬é’¥æ‹·è´åˆ°è¦å…å¯†ç™»é™†çš„ç›®æ ‡æœºå™¨ä¸Š
 	ssh-copy-id localhost
 	---------------------------
-	sshÃâµÇÂ½£º
-		Éú³Ékey:
+	sshå…ç™»é™†ï¼š
+		ç”Ÿæˆkey:
 		ssh-keygen
-		¸´ÖÆ´ÓA¸´ÖÆµ½BÉÏ:
+		å¤åˆ¶ä»Aå¤åˆ¶åˆ°Bä¸Š:
 		ssh-copy-id B
-		ÑéÖ¤£º
-		ssh localhost/exit£¬ps -e|grep ssh
-		ssh A  #ÔÚBÖĞÖ´ĞĞ
+		éªŒè¯ï¼š
+		ssh localhost/exitï¼Œps -e|grep ssh
+		ssh A  #åœ¨Bä¸­æ‰§è¡Œ
 	
 	
 	
