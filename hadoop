@@ -13,3 +13,18 @@ yarn集群中的leader是resource manager，小弟是node manager，一般node m
 加载到eclipse环境中，关闭eclipse后，程序运行正常)。
 (3)默认使用的文件系统是本地文件系统，因此需要配置参数，fs.defaultFS=hdfs://hostname:9000,配置后采用配置的namenode地址对应的文件系统，运行时会出现权限
 问题，此时需要配置运行参数-DHADOOP_USER_NAME=hadoop，之后程序工作正常，可以完成上传下载功能。
+
+
+关于hadoop高可用集群搭建：
+mini                mini2               mini3               mini4
+namenode            datanode            datanode            namenode
+resourcemanager     journalnode         journalnode         resourcemanager
+zkfc                                                        zkfc
+hmaster             hregionserver       hregionserver 
+zookeeper           zookeeper           zookeeper
+journalnode
+以上是每台机器上部署情况
+首先启动zookeeper，在mini，mini2，mini3上启动zookeeper
+启动hdfs时在mini上使用start-dfs.sh即可。启动yarn时，在mini上使用start-yarn.sh后，此时mini4上的resourcemanager并没有启动，需要单独启动，使用
+yarn-deman.sh start resourcemanager启动。
+启动hbase，执行start-hbase.sh即可，通过hbase shell进入命令行。
