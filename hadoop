@@ -28,3 +28,4 @@ journalnode
 启动hdfs时在mini上使用start-dfs.sh即可。启动yarn时，在mini上使用start-yarn.sh后，此时mini4上的resourcemanager并没有启动，需要单独启动，使用
 yarn-deman.sh start resourcemanager启动。
 启动hbase，执行start-hbase.sh即可，通过hbase shell进入命令行。
+hbase建表 create 'table name','rowkey','列族1','列族2'...
