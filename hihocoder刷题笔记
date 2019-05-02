@@ -31,3 +31,9 @@
 因此若a=p1.^e1*p2.^e2*...*pk.^ek;b=p1.^f1*p2.^f2*...*pk.^fk。则a,b的最大公约数为p1.^min(e1,f1)*p2.^min(e2,f2)*...*pk.^min(ek,fk),
 最小公倍数可以表示为p1.^max(e1,f1)*p2.^max(e2,f2)*...*pk.^max(ek,fk)，因此,a,b的最大公约数与最小公倍数的乘积=a*b。
 
+一种高效的素数生成方法，构造1-n的素数表，对于小于n的所有数，筛选掉2*p，3*p,...。
+int m=sqrt(n+0.5);
+for(int i=2;i<=m;i++)
+if(!vis[i])
+for(int j=i*i;j<=n;j+=i)
+vis[j]=1;
