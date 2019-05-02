@@ -1,3 +1,4 @@
 初始化git仓库：git init(该命令最好在一个新建目录里运行，表示将该目录变为git可以管理的仓库)。
 添加文件到仓库：git add <filename>
 提交文件到仓库:git commit -m '说明信息'，该命令会将所有add的文件全部提交。
+git status查看工作区的状态，git diff查看修改的内容。
