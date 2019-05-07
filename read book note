@@ -1,0 +1,3 @@
+Apache Cassandra分布式，去中心，行式数据库 https://www.iteblog.com/archives/2530.html#_Apache_Cassandra（它的数据结构不是关系型的，而是一个多维稀疏哈希表。）
+gossip协议 《分布式原理：一文了解 Gossip 协议》 https://www.iteblog.com/archives/2505.html
+CAP定理介绍 https://www.iteblog.com/archives/2352.html，https://www.iteblog.com/archives/2390.html
