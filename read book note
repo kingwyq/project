@@ -3,3 +3,4 @@ gossip协议 《分布式原理：一文了解 Gossip 协议》 https://www.iteb
 CAP定理介绍 https://www.iteblog.com/archives/2352.html，https://www.iteblog.com/archives/2390.html
 使用Datax进行两个集群间的数据同步，在读取HDFS数据时，会出现数据丢失问题。 https://mp.weixin.qq.com/s/5O0adjnztvdSzorxHv9Aiw
 分类模型与排序模型在推荐系统中的异同分析 https://mp.weixin.qq.com/s/nQmMvEPfeqnqQCDpPEctpw
+Elasticsearch介绍 https://mp.weixin.qq.com/s/ySfjjd0R4H17IuqU_OmtmQ
