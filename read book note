@@ -7,3 +7,4 @@ Elasticsearch介绍 https://mp.weixin.qq.com/s/ySfjjd0R4H17IuqU_OmtmQ
 中间件的作用是标准化，是承载标准化思想的介质或工具，如MQ框架标准化了不同应用或程序直接非实时异步通信的方式，RPC框架标准化了不同应用之间实时通信的方式，
 DAL（data access layer）标准化了应用程序与数据库通信的方式。标准化都是有目的的，需要产生价值，大部分中间件都具备这样一个价值：为了在软件系统迭代过程中
 ，避免将精力过多的花费在某个子功能下众多差异不大的选项中。
+分布式系统精髓：https://mp.weixin.qq.com/s/UlR6DLcC1bXXpOAc3Wx99A
