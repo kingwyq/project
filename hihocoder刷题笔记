@@ -48,3 +48,73 @@ vis[j]=1;
 例如求C（p，q）/C（r，s）当p,q,r,s比较大的时候，此时，直接计算是不可能的，由于C(m,n)=m!/(n!(m-n)!),首先可以根据数据规模确定素数集的大小，将素数集
 首先保存下来，然后，无论是m!,n!还是其他都可以表示成素数的k次幂相乘的形式，可以将幂次单独保存起来，分子上的幂次为正，分母上的为负，最终抵消完之后，用
 所有素数，以及其对应的幂，连乘即是最后结果。具体参考（算法竞赛书p316）
+
+**priority_queue学习
+模板申明带3个参数：priority_queue<Type, Container, Functional>，其中Type 为数据类型，Container为保存数据的容器，Functional 为元素比较方式。
+Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector。
+ 比较方式默认用operator<，所以如果把后面2个参数缺省的话，优先队列就是大顶堆（降序），队头元素最大。
+ 以下代码实现重载大于号操作，实现了小顶堆。
+ #include<bits/stdc++.h>
+using namespace std;
+struct Node{
+	int x,y;
+	Node(int a,int b):x(a),y(b){};
+};
+bool operator >(Node a,Node b)//重载大于号是小顶堆，最大的元素在最后 
+{
+	if(a.x==b.x) return a.y>b.y;
+	return a.x>b.x;
+}
+int main(void)
+{
+	priority_queue< Node,vector<Node>,greater<Node> > que;
+	Node n1(3,1);
+	Node n2(4,2);
+	Node n3(3,2);
+	que.push(n1);
+	que.push(n2);
+	que.push(n3);
+	while(!que.empty())
+	{
+		cout<<que.top().x<<","<<que.top().y<<endl;
+		que.pop();
+	}
+	return 0;
+}
+自定义类型重载operator<后，声明对象时就可以只带一个模板参数。
+小的会放在后面，自定义类型需要重载<号，用来比较自定义的元素大小，两个元素通过比较，哪个小哪个放后面，队头是最大的元素。
+下面这段程序，自定义类型中有两个成员，这里的大小界定逻辑是若x不相同则认为x小的更小，若x相同则认为y小的更小。
+#include<bits/stdc++.h>
+using namespace std;
+struct Node{
+	int x,y;
+	Node(int a,int b):x(a),y(b){};
+};
+bool operator <(Node a,Node b)
+{
+	if(a.x==b.x) return a.y<b.y;
+	return a.x<b.x;
+}
+int main(void)
+{
+	priority_queue< Node > que;
+	Node n1(3,1);
+	Node n2(4,2);
+	Node n3(3,2);
+	que.push(n1);
+	que.push(n2);
+	que.push(n3);
+	while(!que.empty())
+	{
+		cout<<que.top().x<<","<<que.top().y<<endl;
+		que.pop();
+	}
+	return 0;
+}
+如果将上面程序中的操作符重载函数改变为下面的程序：
+bool operator <(Node a,Node b)
+{
+	if(a.x==b.x) return a.y>b.y;
+	return a.x>b.x;
+}
+只是上面微小改变，就可实现将上面的大顶堆改为小顶堆。
