@@ -118,3 +118,44 @@ bool operator <(Node a,Node b)
 	return a.x>b.x;
 }
 只是上面微小改变，就可实现将上面的大顶堆改为小顶堆。
+
+
+**采用priority_queue实现找出出现频率最高的k个数
+#include<bits/stdc++.h>
+using namespace std;
+const int MAX=1e5;
+struct Node{
+	int x,y;
+	Node(int a,int b):x(a),y(b){};
+};
+bool operator <(Node a,Node b)
+{
+//	if(a.x==b.x) return a.y<b.y;
+	if(a.y==b.y) return a.x>b.x;
+	return a.y<b.y;
+}
+int main(void)
+{
+	set<int> s;
+	int x;
+	int a[MAX];
+	priority_queue< Node > que;
+	memset(a,0,sizeof a);
+	while(cin>>x)
+	{
+		a[x]++;
+		s.insert(x);
+	}
+	set<int>::iterator it=s.begin();
+	for(;it!=s.end();++it)
+	{
+		Node b(*it,a[*it]);
+		que.push(b);
+	}
+	while(!que.empty())
+	{
+		cout<<que.top().x<<endl;
+		que.pop();
+	}
+	return 0;
+}
