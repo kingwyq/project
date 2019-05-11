@@ -217,3 +217,5 @@ int main(){
 **c++中的sort函数使用
 sort(a,a+n) 两个参数分别是存放待排序数组的头指针和尾指针
 sort默认是升序排序，如果需要给自定义对象排序需要重载<操作符。
+**c++中的vector使用
+vector<type> a; a.size()//读取大小；a.resize()//改变大小；a.push_back()//香味不添加元素；a.pop_back()//删除最后一个元素；
