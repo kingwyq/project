@@ -220,3 +220,5 @@ sort默认是升序排序，如果需要给自定义对象排序需要重载<操
 **c++中的vector使用
 vector<type> a; a.size()//读取大小；a.resize()//改变大小；a.push_back()//香味不添加元素；a.pop_back()//删除最后一个元素；a.clear()//清空；
 a.empty()//测试是否为空；
+**c++中的set使用
+set中添加自定义对象需要重载<操作符，用于比较是否是相同对象。set<type>::iterator it=x.begin();
