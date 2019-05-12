@@ -228,3 +228,5 @@ map<type,type> m;
 m.insert();//加入元素；m.find()//查找元素；m.count()//统计元素数目；m.remove()//删除元素；map加入元素还可以采用[];
 **c++中stack的使用
 stack<type> a; a.push()//向栈顶添加元素；a.pop()//弹出栈顶元素；a.top()//访问当前栈顶元素；
+**c++中queue的使用
+queue<type> q; q.push()//;q.pop();q.front()//访问当前队首元素;
